@@ -27,3 +27,12 @@ services:
       - 'config:/hass-config'
     environment:
       - HC_BASEPATH=/hass-config
+ node-red:
+    image: 'nodered/node-red:latest'
+    environment:
+      - TZ=Americas/Phoenix
+    ports:
+      - '1880:1880'
+    volumes:
+      - 'config:/node-red-data'
+    restart: always
