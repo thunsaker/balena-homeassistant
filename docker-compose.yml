@@ -1,11 +1,14 @@
 version: '2'
 volumes:
     config:
+    pihole_config:
+    dnsmasq_config:
+    dnscrypt_config:
 services:
   homeassistant:
     build: homeassistant
     ports:
-      - 80:8123
+      - 8081:8123
     privileged: true
     volumes:
       - 'config:/config'
@@ -27,7 +30,7 @@ services:
       - 'config:/hass-config'
     environment:
       - HC_BASEPATH=/hass-config
- node-red:
+  node-red:
     image: 'nodered/node-red:latest'
     environment:
       - TZ=Americas/Phoenix
@@ -36,3 +39,22 @@ services:
     volumes:
       - 'config:/node-red-data'
     restart: always
+
+  pihole:
+    build: ./pihole
+    privileged: true
+    volumes:
+      - 'pihole_config:/etc/pihole'
+      - 'dnsmasq_config:/etc/dnsmasq.d'
+    dns:
+      - '127.0.0.1'
+      - '1.1.1.2'
+    network_mode: host
+
+  # set pihole DNS1 and DNS2 service variables to 127.0.0.1#5053 to use dnscrypt-proxy for upstream DNS
+  dnscrypt-proxy:
+    build: ./dnscrypt-proxy
+    volumes:
+      - 'dnscrypt_config:/config'
+    ports:
+      - '5053:5053/udp'
